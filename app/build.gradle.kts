@@ -88,7 +88,7 @@ dependencies {
     implementation("com.alphacephei:vosk-android:0.3.47")
 
     // JSON parsing
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.13.2")
 
     // Preferences DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
