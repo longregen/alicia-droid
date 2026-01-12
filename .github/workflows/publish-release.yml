@@ -72,7 +72,7 @@ jobs:
 
       - name: Setup Gradle
         if: steps.check_tag.outputs.tag_exists != 'true'
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: false
           gradle-home-cache-cleanup: true
