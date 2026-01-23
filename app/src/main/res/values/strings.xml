@@ -8,42 +8,67 @@
     <string name="tap_to_speak">Tap to speak</string>
     <string name="listening">Listening…</string>
     <string name="processing">Processing…</string>
+    <string name="recognition_error">Couldn\'t hear that</string>
     <string name="you_said">You said:</string>
     <string name="alicia_says">Alicia:</string>
-    <string name="recent_commands">Recent Commands</string>
-    <string name="no_recent_commands">No recent commands</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied</string>
     
     <!-- Settings -->
+    <string name="voice_section">Voice &amp; Input</string>
     <string name="wake_word_detection">Wake Word Detection</string>
     <string name="wake_word_desc">Activate by saying \"Alicia\"</string>
     <string name="voice_feedback">Voice Feedback</string>
     <string name="voice_feedback_desc">Speak responses out loud</string>
     <string name="haptic_feedback">Haptic Feedback</string>
     <string name="haptic_feedback_desc">Vibration for interactions</string>
+    <string name="tts_speed">Speech Speed</string>
     <string name="permissions">Permissions</string>
     <string name="microphone_permission">Microphone</string>
-    <string name="microphone_desc">Required for voice commands</string>
+    <string name="microphone_desc">Required for voice input</string>
     <string name="grant_permission">Grant Permission</string>
     <string name="data_management">Data Management</string>
-    <string name="clear_history">Clear Command History</string>
     <string name="clear_notes">Clear Voice Notes</string>
     <string name="about">About</string>
     <string name="version">Version 1.0</string>
-    <string name="privacy_desc">All voice processing happens on-device. No data sent to servers.</string>
+    <string name="privacy_desc">Wake word detection is on-device. Voice commands and notes use a remote transcription service.</string>
     
     <!-- Voice Notes -->
+    <string name="record_note">Record Note</string>
+    <string name="recording_note">Recording note…</string>
+    <string name="note_saved">Note saved</string>
     <string name="no_voice_notes">No voice notes yet</string>
-    <string name="create_note_hint">Say \"Leave a voice note\" to create your first note</string>
+    <string name="create_note_hint">Tap the note button to record your first note</string>
     <string name="delete_note">Delete Note</string>
     <string name="delete_note_confirm">Are you sure you want to delete this note?</string>
     <string name="play">Play</string>
+    <string name="share">Share</string>
+    <string name="title_hint">Title</string>
+    <string name="stop">Stop</string>
     <string name="playing">Playing…</string>
     
     <!-- Permissions -->
     <string name="permission_required">Permission Required</string>
-    <string name="microphone_permission_required">Microphone permission is required for voice commands.</string>
+    <string name="microphone_permission_required">Microphone permission is required for voice input.</string>
     
     <!-- Service -->
     <string name="service_notification_title">Alicia is listening</string>
     <string name="service_notification_desc">Wake word detection active</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label">Alicia</string>
+
+    <!-- Model Manager -->
+    <string name="speech_models">Speech Models</string>
+    <string name="download">Download</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="downloading">Downloading…</string>
+    <string name="wake_word_label">Wake Word</string>
+    <string name="wake_word_hint">e.g. alicia, hey computer</string>
+    <string name="manage_models">Manage Models</string>
+    <string name="manage_models_desc">Download and select speech recognition models</string>
+
+    <!-- Attribution -->
+    <string name="attribution_wake_word">Wake word detection</string>
+    <string name="attribution_voice_command">Voice command recording</string>
 </resources>

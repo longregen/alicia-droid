@@ -64,6 +64,8 @@ captures/
 result
 result-*
 
-# Vosk model files (downloaded at runtime)
+# Model files (fetched by Nix build)
+app/src/main/assets/silero_vad.onnx
+app/src/main/assets/vosk-models/
 *.zip
 model-*/

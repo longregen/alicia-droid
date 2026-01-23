@@ -49,6 +49,17 @@
           emulator
         ]);
 
+        # Model assets (fetched from upstream, not stored in git)
+        sileroVadModel = pkgs.fetchurl {
+          url = "https://github.com/snakers4/silero-vad/raw/master/src/silero_vad/data/silero_vad.onnx";
+          sha256 = "1qw8hyfjfrac2xz2ns4895dv5pp8hndnyzg6jhm2k7jhyhi3l58s";
+        };
+
+        voskModelSmallEn = pkgs.fetchzip {
+          url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip";
+          sha256 = "1rl65n2maayggnzi811x6zingkd1ny2z7p0fvcbfaprbz5khz2h8";
+        };
+
         # FHS environment for NixOS users (where nix-ld is not enabled)
         fhsEnv = pkgs.buildFHSEnv {
           name = "android-fhs-env";
@@ -78,6 +89,17 @@
           export ANDROID_SDK_ROOT="$ANDROID_HOME"
           export JAVA_HOME="${pkgs.jdk17.home}"
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/35.0.0:$JAVA_HOME/bin:$PATH"
+
+          # Ensure model assets are present
+          if [ ! -f app/src/main/assets/silero_vad.onnx ]; then
+            echo "Copying Silero VAD model..."
+            cp ${sileroVadModel} app/src/main/assets/silero_vad.onnx
+          fi
+          if [ ! -d app/src/main/assets/vosk-models/small-en-us/am ]; then
+            echo "Copying Vosk model..."
+            mkdir -p app/src/main/assets/vosk-models/small-en-us
+            cp -r ${voskModelSmallEn}/. app/src/main/assets/vosk-models/small-en-us/
+          fi
 
           echo "Building ARM v7 debug APK..."
           echo "ANDROID_HOME: $ANDROID_HOME"
@@ -142,14 +164,27 @@
             };
 
             buildPhase = ''
+              export HOME=$(mktemp -d)
               export ANDROID_HOME="${androidSdk}/share/android-sdk"
               export ANDROID_SDK_ROOT="$ANDROID_HOME"
               export JAVA_HOME="${pkgs.jdk17.home}"
-              export GRADLE_USER_HOME="$mitmCache"
+              export GRADLE_USER_HOME=$(mktemp -d)
+              export TMPDIR=$(mktemp -d)
+              export GRADLE_OPTS="-Djava.io.tmpdir=$TMPDIR -Dorg.gradle.native.dir=$TMPDIR/native"
+              mkdir -p $TMPDIR/native
+
+              # Copy model assets into source tree
+              cp ${sileroVadModel} app/src/main/assets/silero_vad.onnx
+              mkdir -p app/src/main/assets/vosk-models/small-en-us
+              cp -r ${voskModelSmallEn}/. app/src/main/assets/vosk-models/small-en-us/
+
+              # Copy cached dependencies to writable GRADLE_USER_HOME
+              cp -a $mitmCache/. $GRADLE_USER_HOME/
+              chmod -R u+w $GRADLE_USER_HOME
 
               gradle assembleDebug \
                 -Pandroid.injected.abi=armeabi-v7a \
-                --offline \
+                -Pandroid.aapt2FromMavenOverride="$ANDROID_HOME/build-tools/35.0.0/aapt2" \
                 --no-daemon \
                 --stacktrace
             '';

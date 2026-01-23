@@ -10,18 +10,13 @@ android {
 
     defaultConfig {
         applicationId = "com.alicia.assistant"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
 
-        // Only English resources
-        resourceConfigurations += listOf("en")
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Configure ABI splits - exclude x86 32-bit
     splits {
         abi {
             isEnable = true
@@ -43,6 +38,9 @@ android {
     }
 
     packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             excludes += listOf(
                 "DebugProbesKt.bin",
@@ -69,13 +67,23 @@ android {
     }
 }
 
+// Required for Nix fetchDeps: test configurations cause variant ambiguity with AGP 8.7.x
+afterEvaluate {
+    configurations.matching {
+        (it.name.contains("AndroidTest", ignoreCase = true) ||
+            it.name.contains("UnitTest", ignoreCase = true) ||
+            it.name.contains("Test", ignoreCase = true)) &&
+            it.isCanBeResolved
+    }.configureEach {
+        isCanBeResolved = false
+    }
+}
+
 dependencies {
     // AndroidX Core
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
     // Material Design 3
     implementation("com.google.android.material:material:1.11.0")
@@ -84,8 +92,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
-    // Vosk Speech Recognition (offline STT)
-    implementation("com.alphacephei:vosk-android:0.3.47")
+    // Vosk offline speech recognition
+    implementation("com.alphacephei:vosk-android:0.3.75@aar")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
+
+    // HTTP client for Whisper API
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
@@ -93,13 +105,15 @@ dependencies {
     // Preferences DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-    // WorkManager for background tasks
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
-    // Testing
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test:rules:1.5.0")
-    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    // ML Kit Text Recognition (bundled, no Play Services Dynamite dependency)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+
+    // Media session for headset button support
+    implementation("androidx.media:media:1.7.0")
+
+    // ONNX Runtime for Silero VAD
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.2")
 }

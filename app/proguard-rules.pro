@@ -1,21 +1,22 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in /path/to/sdk/tools/proguard/proguard-android.txt
-
-# Keep data models
--keep class com.alicia.assistant.model.** { *; }
-
-# Keep Gson classes
+# Gson
 -keepattributes Signature
 -keepattributes *Annotation*
--keep class com.google.gson.** { *; }
--keep class * implements com.google.gson.TypeAdapter
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
+-keep class com.alicia.assistant.model.** { *; }
 
-# Keep DataStore
--keep class androidx.datastore.** { *; }
+# Gson TypeToken
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
 
-# Keep speech recognition
--keep class android.speech.** { *; }
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+
+# Vosk
+-keep class org.vosk.** { *; }
+-keep class com.sun.jna.** { *; }
+-dontwarn com.sun.jna.**
+
+# JNA
+-keep class net.java.dev.jna.** { *; }
+-dontwarn net.java.dev.jna.**

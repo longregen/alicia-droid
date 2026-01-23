@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="?attr/colorSurface">
 
     <ScrollView
@@ -39,53 +40,74 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="60dp"/>
 
-            <!-- Activation Button Container -->
-            <FrameLayout
+            <!-- Activation Buttons -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_gravity="center">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="24dp">
 
-                <!-- Wave rings -->
-                <View
-                    android:id="@+id/waveRing2"
-                    android:layout_width="240dp"
-                    android:layout_height="240dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/wave_ring"
-                    android:visibility="gone"
-                    android:alpha="0.2"/>
-
-                <View
-                    android:id="@+id/waveRing1"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/wave_ring"
-                    android:visibility="gone"
-                    android:alpha="0.3"/>
-
-                <!-- Main activation button -->
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/activationButton"
+                <!-- Main activation button with wave rings -->
+                <FrameLayout
                     android:layout_width="160dp"
                     android:layout_height="160dp"
-                    android:layout_gravity="center"
-                    app:fabCustomSize="160dp"
-                    app:maxImageSize="80dp"
-                    app:tint="?attr/colorOnPrimary"
-                    android:src="@drawable/ic_microphone"
-                    app:backgroundTint="?attr/colorPrimaryContainer"
-                    app:elevation="8dp"/>
+                    android:layout_marginEnd="24dp">
 
-            </FrameLayout>
+                    <View
+                        android:id="@+id/waveRing2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:background="@drawable/wave_ring"
+                        android:visibility="gone"
+                        android:alpha="0.2"/>
+
+                    <View
+                        android:id="@+id/waveRing1"
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/wave_ring"
+                        android:visibility="gone"
+                        android:alpha="0.3"/>
+
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/activationButton"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_gravity="center"
+                        app:fabCustomSize="120dp"
+                        app:maxImageSize="56dp"
+                        app:tint="?attr/colorOnPrimaryContainer"
+                        android:src="@drawable/ic_microphone"
+                        app:backgroundTint="?attr/colorPrimaryContainer"
+                        app:elevation="8dp"/>
+
+                </FrameLayout>
+
+                <!-- Record note button -->
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/noteRecordButton"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    app:fabCustomSize="120dp"
+                    app:maxImageSize="56dp"
+                    app:tint="?attr/colorOnSecondaryContainer"
+                    android:src="@drawable/ic_edit_note"
+                    app:backgroundTint="?attr/colorSecondaryContainer"
+                    app:elevation="8dp"
+                    android:contentDescription="@string/record_note"/>
+
+            </LinearLayout>
 
             <!-- Transcription and Response -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp"
+                app:cardCornerRadius="12dp"
                 android:visibility="gone"
                 android:id="@+id/responseCard">
 
@@ -95,14 +117,32 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/you_said"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:layout_marginBottom="4dp"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/you_said"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                        <ImageButton
+                            android:id="@+id/copyTranscribedButton"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_copy"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/copy"
+                            android:padding="6dp"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/transcribedText"
@@ -112,14 +152,32 @@
                         android:textColor="?attr/colorOnSurface"
                         android:layout_marginBottom="16dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/alicia_says"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:layout_marginBottom="4dp"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/alicia_says"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                        <ImageButton
+                            android:id="@+id/copyResponseButton"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_copy"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/copy"
+                            android:padding="6dp"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/responseText"
@@ -131,31 +189,6 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Recent Commands -->
-            <LinearLayout
-                android:id="@+id/recentCommandsSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="32dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/recent_commands"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="16dp"/>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recentCommandsRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
 
         </LinearLayout>
 

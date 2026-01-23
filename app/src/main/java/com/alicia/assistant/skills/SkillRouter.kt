@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.AlarmClock
-import android.speech.tts.TextToSpeech
-import java.util.*
+import android.util.Log
+import com.alicia.assistant.service.LlmClient
+import java.util.Date
+import java.util.Locale
 
 data class SkillResult(
     val success: Boolean,
@@ -13,93 +15,53 @@ data class SkillResult(
     val action: String? = null
 )
 
-class SkillRouter(private val context: Context) {
-    
-    private var tts: TextToSpeech? = null
-    
-    init {
-        tts = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.US
-            }
-        }
-    }
-    
-    suspend fun processCommand(input: String): SkillResult {
+class SkillRouter(private val context: Context, private val llmClient: LlmClient = LlmClient()) {
+
+    suspend fun processInput(input: String, screenContext: String? = null): SkillResult {
         val lowerInput = input.lowercase().trim()
-        
-        // Try each skill in priority order
+
         return when {
-            // Voice notes skill (highest priority)
-            lowerInput.contains("note") || lowerInput.contains("remind") -> {
-                handleVoiceNote(input)
-            }
-            
-            // App launcher skill
-            lowerInput.contains("open") || lowerInput.contains("launch") -> {
-                handleAppLauncher(input)
-            }
-            
-            // Music skill
-            lowerInput.contains("play") && lowerInput.contains("music") -> {
-                handleMusicControl(input)
-            }
-            
-            // Timer skill
-            lowerInput.contains("timer") || lowerInput.contains("alarm") -> {
-                handleTimer(input)
-            }
-            
-            // Time query
-            lowerInput.contains("time") -> {
-                handleTimeQuery()
-            }
-            
-            // Date query
-            lowerInput.contains("date") || lowerInput.contains("day") -> {
-                handleDateQuery()
-            }
-            
-            // Weather query
-            lowerInput.contains("weather") -> {
-                handleWeatherQuery()
-            }
-            
-            // Default assistant response
+            lowerInput.matches(Regex(".*(save|make|create|leave)\\s+(a\\s+)?(voice\\s+)?note.*")) ||
+            lowerInput.matches(Regex(".*(remind|remember)\\s+me.*")) -> handleVoiceNote(input)
+
+            lowerInput.matches(Regex("^(open|launch|start|go to|switch to)\\s+.*")) -> handleAppLauncher(input)
+
+            lowerInput.contains("play") && lowerInput.contains("music") -> handleMusicControl(input)
+
+            lowerInput.matches(Regex(".*(set|start|create)\\s+(a\\s+)?(timer|alarm).*")) ||
+            lowerInput.matches(Regex("^(timer|alarm).*")) -> handleTimer(input)
+
+            lowerInput.matches(Regex(".*(what('s|\\s+is)?\\s+the\\s+time|tell.*time|current\\s+time).*")) -> handleTimeQuery()
+
+            lowerInput.matches(Regex(".*(what('s|\\s+is)?\\s+(the\\s+)?(date|day)|today('s|\\s+is)).*")) -> handleDateQuery()
+
             else -> {
+                val prompt = if (screenContext != null) {
+                    "[Screen content]\n$screenContext\n[End screen content]\n\nUser: $input"
+                } else {
+                    input
+                }
+                val response = llmClient.chat(prompt)
                 SkillResult(
-                    success = false,
-                    response = "I can help you open apps, play music, save notes, or answer basic questions. What would you like to do?"
+                    success = true,
+                    response = response,
+                    action = "llm_chat"
                 )
             }
         }
     }
     
     private fun handleVoiceNote(input: String): SkillResult {
-        // Extract note content
-        val noteContent = input
-            .replace(Regex("(leave|save|create|make)\\s+(a\\s+)?(voice\\s+)?note", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("(remind|remember)\\s+(me\\s+)?(to\\s+)?", RegexOption.IGNORE_CASE), "")
-            .trim()
-        
-        if (noteContent.isEmpty()) {
-            return SkillResult(
-                success = false,
-                response = "What would you like me to note?"
-            )
-        }
-        
-        // Save note (implementation in PreferencesManager)
         return SkillResult(
             success = true,
-            response = "Voice note saved: $noteContent",
-            action = "save_note"
+            response = "To save a voice note, use the note recording button on the main screen.",
+            action = "note_hint"
         )
     }
     
     private fun handleAppLauncher(input: String): SkillResult {
         val appName = input
-            .replace(Regex("(open|launch|start|go to|switch to)\\s+", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("(open|launch|start|go to|switch to)\\s+(the\\s+)?", RegexOption.IGNORE_CASE), "")
             .trim()
             .lowercase()
         
@@ -116,28 +78,34 @@ class SkillRouter(private val context: Context) {
             "telegram" to "org.telegram.messenger"
         )
         
-        val packageName = appPackages[appName]
-        
+        val match = appPackages.entries.firstOrNull { (key, _) ->
+            appName.contains(key) || key.contains(appName)
+        }
+        val packageName = match?.value
+        val displayName = match?.key ?: appName
+
         return if (packageName != null) {
             try {
                 val intent = context.packageManager.getLaunchIntentForPackage(packageName)
                 if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(intent)
                     SkillResult(
                         success = true,
-                        response = "Opening $appName",
+                        response = "Opening $displayName",
                         action = "open_app"
                     )
                 } else {
                     SkillResult(
                         success = false,
-                        response = "$appName is not installed on your device"
+                        response = "$displayName is not installed on your device"
                     )
                 }
             } catch (e: Exception) {
+                Log.e("SkillRouter", "Failed to open app: $appName", e)
                 SkillResult(
                     success = false,
-                    response = "Failed to open $appName"
+                    response = "Failed to open $displayName"
                 )
             }
         } else {
@@ -150,9 +118,9 @@ class SkillRouter(private val context: Context) {
     
     private fun handleMusicControl(input: String): SkillResult {
         return try {
-            // Try to open Spotify
             val intent = context.packageManager.getLaunchIntentForPackage("com.spotify.music")
             if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
                 SkillResult(
                     success = true,
@@ -160,9 +128,9 @@ class SkillRouter(private val context: Context) {
                     action = "play_music"
                 )
             } else {
-                // Fallback to generic music intent
                 val musicIntent = Intent(Intent.ACTION_VIEW).apply {
                     data = Uri.parse("music://")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(musicIntent)
                 SkillResult(
@@ -172,6 +140,7 @@ class SkillRouter(private val context: Context) {
                 )
             }
         } catch (e: Exception) {
+            Log.e("SkillRouter", "Failed to open music app", e)
             SkillResult(
                 success = false,
                 response = "Please open your music app manually"
@@ -191,6 +160,7 @@ class SkillRouter(private val context: Context) {
                 action = "set_timer"
             )
         } catch (e: Exception) {
+            Log.e("SkillRouter", "Failed to set timer", e)
             SkillResult(
                 success = false,
                 response = "Please open your clock app to set a timer"
@@ -217,20 +187,5 @@ class SkillRouter(private val context: Context) {
             action = "date_query"
         )
     }
-    
-    private fun handleWeatherQuery(): SkillResult {
-        return SkillResult(
-            success = false,
-            response = "I don't have access to weather data yet. Please check your weather app!"
-        )
-    }
-    
-    fun speak(text: String) {
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
-    }
-    
-    fun destroy() {
-        tts?.stop()
-        tts?.shutdown()
-    }
+
 }
