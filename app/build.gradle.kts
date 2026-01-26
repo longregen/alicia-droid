@@ -112,7 +112,7 @@ dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
     // Media session for headset button support
-    implementation("androidx.media:media:1.7.0")
+    implementation("androidx.media:media:1.7.1")
 
     // ONNX Runtime for Silero VAD
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.2")
