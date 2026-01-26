@@ -97,7 +97,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
     // HTTP client for Whisper API
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
     // JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
