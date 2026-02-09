@@ -115,5 +115,5 @@ dependencies {
     implementation("androidx.media:media:1.7.0")
 
     // ONNX Runtime for Silero VAD
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.2")
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.24.1")
 }
